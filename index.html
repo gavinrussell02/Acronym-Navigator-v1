@@ -1,0 +1,765 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<link href="https://media.licdn.com/dms/image/v2/C4E0BAQG3GDjokrGvYg/company-logo_200_200/company-logo_200_200/0/1673561094950/riverpoint_medical_logo?e=2147483647&amp;v=beta&amp;t=eUOvEer6Egfku_q2-4X2B7sVpo07mZcKLpSJrFsikR8" rel="icon" type="image/png"/>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Acronym Navigator</title>
+<style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+      background-color: #ffffff;
+      color: #333;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+    }
+    header img {
+      height: 50px;
+    }
+    header div {
+      text-align: right;
+      font-size: 0.9rem;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 0.5rem;
+      color: #0d6937;
+    }
+    input {
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+    th, td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    th {
+      background-color: #0d6937;
+      color: white;
+    }
+    tr:hover {
+      background-color: #c8e1d5;
+    }
+  
+@media (max-width: 600px) {
+  body {
+    margin: 1rem;
+    font-size: 0.95rem;
+  }
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  h1 {
+    font-size: 1.75rem !important;
+  }
+  input {
+    font-size: 0.95rem;
+  }
+  table, th, td {
+    font-size: 0.9rem;
+    word-wrap: break-word;
+  }
+  #suggestionPopup {
+    width: 90% !important;
+    padding: 16px !important;
+  }
+}
+
+</style>
+</head>
+<body>
+<header>
+<img alt="Riverpoint Medical Logo" src="https://rpmed.com/wp-content/uploads/2022/07/RiverpointMedical_LOGO.png"/>
+<div>
+<a href="https://rpmed.com/" style="text-decoration: none; color: #0d6937; font-size: 1rem; font-weight: bold;" target="_blank">Homepage</a><br/>
+<label for="language-select" style="margin-top: 6px; display: inline-flex; align-items: center; gap: 5px; font-size: 0.85rem; color: #0d6937;">
+<img alt="Language Icon" src="https://rpmed.com/wp-content/uploads/2022/11/Asset-2@2x.png" style="height: 18px; vertical-align: middle;"/>
+<select id="language-select" style="border: 1px solid #ccc; border-radius: 4px; padding: 2px 4px; font-size: 0.85rem;">
+<option value="en">English</option>
+<option value="es">Español</option>
+</select>
+</label>
+</div>
+</header>
+<h1 style="font-size: 2.5rem; text-align: center; margin-top: 0; margin-bottom: 1rem; color: #0d6937;">Acronym Navigator</h1>
+<input id="searchInput" placeholder="Search by acronym or definition..." type="text"/>
+<table>
+<thead>
+<tr>
+<th id="header-acronym">Acronym</th>
+<th id="header-definition">Definition</th>
+</tr>
+</thead>
+<tbody id="acronymTable"></tbody>
+<p id="noResultsMessage" style="display:none; color:#d00; font-weight:bold; text-align:center;">
+<span id="noAcronymsText">No acronyms found.</span><br/>
+<button id="suggestButton" onclick="showPopup()" style="margin-top:10px; padding:8px 12px; background-color:#0d6937; color:white; border:none; border-radius:4px; cursor:pointer;">Suggest an Acronym</button>
+</p>
+</table>
+<script>
+    const data = [
+  {
+    "acronym": "ACE",
+    "en": "Absolute Critical Endeavor",
+    "es": "Esfuerzo Cr\u00edtico Absoluto"
+  },
+  {
+    "acronym": "ASL",
+    "en": "Approved Supplier List",
+    "es": "Lista de Proveedores Aprobados"
+  },
+  {
+    "acronym": "BI",
+    "en": "Biological Indicator",
+    "es": "Indicador Biol\u00f3gico"
+  },
+  {
+    "acronym": "BK",
+    "en": "DSM Black Fiber",
+    "es": "Fibra Negra DSM"
+  },
+  {
+    "acronym": "BL",
+    "en": "DSM Blue Fiber",
+    "es": "Fibra Azul DSM"
+  },
+  {
+    "acronym": "BOM",
+    "en": "Bill of Materials",
+    "es": "Lista de Materiales"
+  },
+  {
+    "acronym": "BR",
+    "en": "Batch Record",
+    "es": "Registro de Lote"
+  },
+  {
+    "acronym": "CAD",
+    "en": "Computer-Aided Design",
+    "es": "Dise\u00f1o Asistido por Computadora"
+  },
+  {
+    "acronym": "CAPA",
+    "en": "Corrective and Preventive Action",
+    "es": "Acci\u00f3n Correctiva y Preventiva"
+  },
+  {
+    "acronym": "CE",
+    "en": "Conformit\u00e9 Europ\u00e9enne (European Conformity)",
+    "es": "Conformidad Europea"
+  },
+  {
+    "acronym": "CFR",
+    "en": "Code of Federal Regulations",
+    "es": "C\u00f3digo de Regulaciones Federales"
+  },
+  {
+    "acronym": "COA",
+    "en": "Certificate of Analysis",
+    "es": "Certificado de An\u00e1lisis"
+  },
+  {
+    "acronym": "COC",
+    "en": "Certificate of Conformance",
+    "es": "Certificado de Conformidad"
+  },
+  {
+    "acronym": "CRM",
+    "en": "Customer Relationship Management",
+    "es": "Gesti\u00f3n de Relaciones con Clientes"
+  },
+  {
+    "acronym": "CSV",
+    "en": "Computer System Validation",
+    "es": "Validaci\u00f3n de Sistema Inform\u00e1tico"
+  },
+  {
+    "acronym": "CTQ",
+    "en": "Critical to Quality",
+    "es": "Cr\u00edtico para la Calidad"
+  },
+  {
+    "acronym": "DCO",
+    "en": "Document Change Order",
+    "es": "Orden de Cambio de Documento"
+  },
+  {
+    "acronym": "DFMEA",
+    "en": "Design Failure Modes and Effects Analysis",
+    "es": "An\u00e1lisis de Modos y Efectos de Fallos en el Dise\u00f1o"
+  },
+  {
+    "acronym": "DHR",
+    "en": "Device History Record",
+    "es": "Registro de Historial del Dispositivo"
+  },
+  {
+    "acronym": "DMR",
+    "en": "Device Master Record",
+    "es": "Registro Maestro del Dispositivo"
+  },
+  {
+    "acronym": "DOE",
+    "en": "Design of Experiments",
+    "es": "Dise\u00f1o de Experimentos"
+  },
+  {
+    "acronym": "DPS",
+    "en": "DePuy Synthes (J&J)",
+    "es": "DePuy Synthes (J&J)"
+  },
+  {
+    "acronym": "ECO",
+    "en": "Engineering Change Order",
+    "es": "Orden de Cambio de Ingenier\u00eda"
+  },
+  {
+    "acronym": "EO",
+    "en": "Ethylene Oxide (Sterilization Method)",
+    "es": "\u00d3xido de Etileno (M\u00e9todo de Esterilizaci\u00f3n)"
+  },
+  {
+    "acronym": "ERP",
+    "en": "Enterprise Resource Planning",
+    "es": "Planificaci\u00f3n de Recursos Empresariales"
+  },
+  {
+    "acronym": "FAT",
+    "en": "Factory Acceptance Test",
+    "es": "Prueba de Aceptaci\u00f3n en F\u00e1brica"
+  },
+  {
+    "acronym": "FDA",
+    "en": "Food and Drug Administration",
+    "es": "Administraci\u00f3n de Alimentos y Medicamentos"
+  },
+  {
+    "acronym": "FFS",
+    "en": "Form/Fill/Seal",
+    "es": "Formar/Llenar/Sellar"
+  },
+  {
+    "acronym": "FMEA",
+    "en": "Failure Modes and Effects Analysis",
+    "es": "An\u00e1lisis de Modos y Efectos de Fallos"
+  },
+  {
+    "acronym": "GCP",
+    "en": "Good Clinical Practice",
+    "es": "Buenas Pr\u00e1cticas Cl\u00ednicas"
+  },
+  {
+    "acronym": "GLP",
+    "en": "Good Laboratory Practice",
+    "es": "Buenas Pr\u00e1cticas de Laboratorio"
+  },
+  {
+    "acronym": "GMP",
+    "en": "Good Manufacturing Practice",
+    "es": "Buenas Pr\u00e1cticas de Manufactura"
+  },
+  {
+    "acronym": "GR",
+    "en": "DSM Green Fiber",
+    "es": "Fibra Verde DSM"
+  },
+  {
+    "acronym": "GS1",
+    "en": "Global Standards One (Barcode format)",
+    "es": "Est\u00e1ndares Globales Uno (formato de c\u00f3digo de barras)"
+  },
+  {
+    "acronym": "HIBC",
+    "en": "Health Industry Bar Code",
+    "es": "C\u00f3digo de Barras de la Industria de la Salud"
+  },
+  {
+    "acronym": "HR",
+    "en": "Human Resources",
+    "es": "Recursos Humanos"
+  },
+  {
+    "acronym": "IFU",
+    "en": "Instructions for Use",
+    "es": "Instrucciones de Uso"
+  },
+  {
+    "acronym": "IQ",
+    "en": "Installation Qualification",
+    "es": "Calificaci\u00f3n de Instalaci\u00f3n"
+  },
+  {
+    "acronym": "IQ/OQ/PQ",
+    "en": "Installation/Operational/Performance Qualification",
+    "es": "Calificaci\u00f3n de Instalaci\u00f3n/Operaci\u00f3n/Rendimiento"
+  },
+  {
+    "acronym": "IQMS",
+    "en": "Integrated Quality Management System",
+    "es": "Sistema Integrado de Gesti\u00f3n de Calidad"
+  },
+  {
+    "acronym": "ISO",
+    "en": "International Organization for Standardization",
+    "es": "Organizaci\u00f3n Internacional de Normalizaci\u00f3n"
+  },
+  {
+    "acronym": "LAL",
+    "en": "Limulus Amebocyte Lysate (Endotoxin Test)",
+    "es": "Lisado de Amebocitos de Limulus (Prueba de Endotoxinas)"
+  },
+  {
+    "acronym": "LOT",
+    "en": "Lot Number",
+    "es": "N\u00famero de Lote"
+  },
+  {
+    "acronym": "MDR",
+    "en": "Medical Device Reporting",
+    "es": "Informe de Dispositivo M\u00e9dico"
+  },
+  {
+    "acronym": "MES",
+    "en": "Manufacturing Execution System",
+    "es": "Sistema de Ejecuci\u00f3n de Manufactura"
+  },
+  {
+    "acronym": "MOQ",
+    "en": "Minimum Order Quantity",
+    "es": "Cantidad M\u00ednima de Pedido"
+  },
+  {
+    "acronym": "MRB",
+    "en": "Material Review Board",
+    "es": "Junta de Revisi\u00f3n de Materiales"
+  },
+  {
+    "acronym": "MRP",
+    "en": "Material Requirements Planning",
+    "es": "Planificaci\u00f3n de Requerimientos de Materiales"
+  },
+  {
+    "acronym": "MSDS",
+    "en": "Material Safety Data Sheet",
+    "es": "Hoja de Datos de Seguridad del Material"
+  },
+  {
+    "acronym": "MWI",
+    "en": "MWI Veterinary Supply",
+    "es": "Suministros Veterinarios MWI"
+  },
+  {
+    "acronym": "NCR",
+    "en": "Nonconformance Report",
+    "es": "Informe de No Conformidad"
+  },
+  {
+    "acronym": "NDA",
+    "en": "Non-Disclosure Agreement",
+    "es": "Acuerdo de Confidencialidad"
+  },
+  {
+    "acronym": "NI",
+    "en": "No Impact",
+    "es": "Sin Impacto"
+  },
+  {
+    "acronym": "NPI",
+    "en": "New Product Introduction",
+    "es": "Introducci\u00f3n de Nuevo Producto"
+  },
+  {
+    "acronym": "OQ",
+    "en": "Operational Qualification",
+    "es": "Calificaci\u00f3n Operacional"
+  },
+  {
+    "acronym": "PCD",
+    "en": "Process Challenge Device",
+    "es": "Dispositivo de Desaf\u00edo de Proceso"
+  },
+  {
+    "acronym": "PD",
+    "en": "Process Deviation",
+    "es": "Desviaci\u00f3n de Proceso"
+  },
+  {
+    "acronym": "PFMEA",
+    "en": "Process Failure Modes and Effects Analysis",
+    "es": "An\u00e1lisis de Modos y Efectos de Fallos del Proceso"
+  },
+  {
+    "acronym": "PI",
+    "en": "Product Insert",
+    "es": "Inserto de Producto"
+  },
+  {
+    "acronym": "PM",
+    "en": "Preventive Maintenance",
+    "es": "Mantenimiento Preventivo"
+  },
+  {
+    "acronym": "PN",
+    "en": "Part Number",
+    "es": "N\u00famero de Parte"
+  },
+  {
+    "acronym": "PO",
+    "en": "Purchase Order",
+    "es": "Orden de Compra"
+  },
+  {
+    "acronym": "PPI",
+    "en": "Picks Per Inch",
+    "es": "Cruces por Pulgada"
+  },
+  {
+    "acronym": "PQ",
+    "en": "Performance Qualification",
+    "es": "Calificaci\u00f3n de Rendimiento"
+  },
+  {
+    "acronym": "QA",
+    "en": "Quality Assurance",
+    "es": "Aseguramiento de Calidad"
+  },
+  {
+    "acronym": "QC",
+    "en": "Quality Control",
+    "es": "Control de Calidad"
+  },
+  {
+    "acronym": "QMS",
+    "en": "Quality Management System",
+    "es": "Sistema de Gesti\u00f3n de Calidad"
+  },
+  {
+    "acronym": "R&D",
+    "en": "Research and Development",
+    "es": "Investigaci\u00f3n y Desarrollo"
+  },
+  {
+    "acronym": "RA",
+    "en": "Regulatory Affairs",
+    "es": "Asuntos Regulatorios"
+  },
+  {
+    "acronym": "RMA",
+    "en": "Return Material Authorization",
+    "es": "Autorizaci\u00f3n de Devoluci\u00f3n de Material"
+  },
+  {
+    "acronym": "ROBAR",
+    "en": "Label Control & Change Tracking System",
+    "es": "Sistema de Control de Etiquetas y Seguimiento de Cambios"
+  },
+  {
+    "acronym": "ROI",
+    "en": "Return on Investment",
+    "es": "Retorno de la Inversi\u00f3n"
+  },
+  {
+    "acronym": "RP",
+    "en": "Riverpoint",
+    "es": "Riverpoint"
+  },
+  {
+    "acronym": "RTF",
+    "en": "Round to Flat",
+    "es": "Redondo a Plano"
+  },
+  {
+    "acronym": "SAT",
+    "en": "Site Acceptance Test",
+    "es": "Prueba de Aceptaci\u00f3n en Sitio"
+  },
+  {
+    "acronym": "SDS",
+    "en": "Safety Data Sheet",
+    "es": "Hoja de Datos de Seguridad"
+  },
+  {
+    "acronym": "SGX",
+    "en": "DSM White Fiber",
+    "es": "Fibra Blanca DSM"
+  },
+  {
+    "acronym": "SK-KIT201",
+    "en": "Suture Kit SKU",
+    "es": "N\u00famero de Parte del Kit de Suturas"
+  },
+  {
+    "acronym": "SKU",
+    "en": "Stock Keeping Unit",
+    "es": "Unidad de Mantenimiento de Inventario"
+  },
+  {
+    "acronym": "SME",
+    "en": "Subject Matter Expert",
+    "es": "Experto en la Materia"
+  },
+  {
+    "acronym": "SOP",
+    "en": "Standard Operating Procedure",
+    "es": "Procedimiento Operativo Est\u00e1ndar"
+  },
+  {
+    "acronym": "SYK",
+    "en": "Stryker",
+    "es": "Stryker"
+  },
+  {
+    "acronym": "TAT",
+    "en": "Turnaround Time",
+    "es": "Tiempo de Respuesta"
+  },
+  {
+    "acronym": "TBD",
+    "en": "To Be Determined",
+    "es": "Por Determinar"
+  },
+  {
+    "acronym": "TG",
+    "en": "DSM Fiber \u2013 unclear meaning",
+    "es": "Fibra DSM \u2013 significado no claro"
+  },
+  {
+    "acronym": "TPM",
+    "en": "Total Productive Maintenance",
+    "es": "Mantenimiento Productivo Total"
+  },
+  {
+    "acronym": "TS",
+    "en": "Technical Specification",
+    "es": "Especificaci\u00f3n T\u00e9cnica"
+  },
+  {
+    "acronym": "UDI",
+    "en": "Unique Device Identifier",
+    "es": "Identificador \u00danico del Dispositivo"
+  },
+  {
+    "acronym": "UG",
+    "en": "DSM White Fiber (thin filaments)",
+    "es": "Fibra Blanca DSM (filamentos delgados)"
+  },
+  {
+    "acronym": "UPS",
+    "en": "United Parcel Service",
+    "es": "Servicio de Paqueter\u00eda UPS"
+  },
+  {
+    "acronym": "USP",
+    "en": "United States Pharmacopeia (Suture Size System)",
+    "es": "Farmacopea de los Estados Unidos (Sistema de Tama\u00f1o de Suturas)"
+  },
+  {
+    "acronym": "USPS",
+    "en": "United States Postal Service",
+    "es": "Servicio Postal de los Estados Unidos"
+  },
+  {
+    "acronym": "VG",
+    "en": "DSM Blue Fiber (thin filaments)",
+    "es": "Fibra Azul DSM (filamentos delgados)"
+  },
+  {
+    "acronym": "VOC",
+    "en": "Voice of the Customer",
+    "es": "Voz del Cliente"
+  },
+  {
+    "acronym": "WI",
+    "en": "Work Instruction",
+    "es": "Instrucci\u00f3n de Trabajo"
+  }
+];
+
+    const tableBody = document.getElementById("acronymTable");
+    const searchInput = document.getElementById("searchInput");
+    const languageSelect = document.getElementById("language-select");
+
+    let currentLanguage = "en";
+
+    
+    function renderTable(filteredData) {
+      const noResults = document.getElementById("noResultsMessage");
+      if (filteredData.length === 0) {
+        noResults.style.display = "block";
+      } else {
+        noResults.style.display = "none";
+      }
+
+      tableBody.innerHTML = "";
+      filteredData.forEach(function(item) {
+        const row = `<tr><td>${item.acronym}</td><td>${item[currentLanguage]}</td></tr>`;
+        tableBody.innerHTML += row;
+      });
+    }
+
+    function getFilteredData(term) {
+      const lowerTerm = term.toLowerCase().trim();
+      return data.filter(function(item) {
+        return item.acronym.toLowerCase() === lowerTerm ||
+               item.en.toLowerCase() === lowerTerm ||
+               item.es.toLowerCase() === lowerTerm;
+      });
+    }
+
+    searchInput.addEventListener("input", function() {
+      const term = searchInput.value.toLowerCase().trim();
+      if (term === "") {
+        renderTable(data);
+      } else {
+        renderTable(getFilteredData(term));
+      }
+    });
+
+    languageSelect.addEventListener("change", function() {
+      currentLanguage = languageSelect.value;
+      const term = searchInput.value.toLowerCase();
+      renderTable(getFilteredData(term));
+    });
+
+    // Initial render
+    renderTable(data);
+  
+    // Also update the title and homepage link based on language
+    function updatePlaceholder() {
+      const searchInput = document.getElementById("searchInput");
+      searchInput.placeholder = currentLanguage === "es"
+        ? "Buscar por acrónimo o definición..."
+        : "Search by acronym or definition...";
+    }
+
+    function updatePageText() {
+
+      const noAcronymsText = document.getElementById("noAcronymsText");
+      const suggestButton = document.getElementById("suggestButton");
+      const popupTitle = document.querySelector("#suggestionPopup h3");
+      const acronymLabel = document.querySelector("#suggestionPopup label:nth-of-type(1)");
+      const definitionLabel = document.querySelector("#suggestionPopup label:nth-of-type(2)");
+      const submitBtn = document.querySelector("#suggestionPopup button:nth-of-type(1)");
+      const cancelBtn = document.querySelector("#suggestionPopup button:nth-of-type(2)");
+
+      if (currentLanguage === "es") {
+        noAcronymsText.textContent = "No se encontraron acrónimos.";
+        suggestButton.textContent = "Sugerir un Acrónimo";
+        popupTitle.textContent = "Sugerir un Acrónimo";
+        acronymLabel.textContent = "Acrónimo:";
+        definitionLabel.textContent = "Definición:";
+        submitBtn.textContent = "Enviar";
+        cancelBtn.textContent = "Cancelar";
+      } else {
+        noAcronymsText.textContent = "No acronyms found.";
+        suggestButton.textContent = "Suggest an Acronym";
+        popupTitle.textContent = "Suggest an Acronym";
+        acronymLabel.textContent = "Acronym:";
+        definitionLabel.textContent = "Definition:";
+        submitBtn.textContent = "Submit";
+        cancelBtn.textContent = "Cancel";
+      }
+
+
+      const headerAcronym = document.getElementById("header-acronym");
+      const headerDefinition = document.getElementById("header-definition");
+
+      if (currentLanguage === "es") {
+        headerAcronym.textContent = "Acrónimo";
+        headerDefinition.textContent = "Definición";
+      } else {
+        headerAcronym.textContent = "Acronym";
+        headerDefinition.textContent = "Definition";
+      }
+    
+      const titleElement = document.querySelector("h1");
+      const homepageLink = document.querySelector("a[href='https://rpmed.com/']");
+
+      if (currentLanguage === "es") {
+        titleElement.textContent = "Navegador de Acrónimos";
+        homepageLink.textContent = "Página Principal";
+      } else {
+        titleElement.textContent = "Acronym Navigator";
+        homepageLink.textContent = "Homepage";
+      }
+    }
+
+    languageSelect.addEventListener("change", function() {
+      currentLanguage = languageSelect.value;
+      const term = searchInput.value.toLowerCase().trim();
+
+      if (term === "") {
+        renderTable(data); // Show full list if search is empty
+      } else {
+        renderTable(getFilteredData(term)); // Filter normally
+      }
+
+      updatePageText();
+      updatePlaceholder();
+    });
+
+    // Initial render
+    renderTable(data);
+    updatePageText();
+      updatePlaceholder();
+    updatePlaceholder();
+    </script>
+<script>
+function showPopup() {
+  document.getElementById("suggestionPopup").style.display = "block";
+  document.getElementById("overlay").style.display = "block";
+}
+
+function closePopup() {
+  document.getElementById("suggestionPopup").style.display = "none";
+  document.getElementById("overlay").style.display = "none";
+}
+
+function submitSuggestion() {
+  const acronym = document.getElementById("suggestAcronym").value.trim();
+  const definition = document.getElementById("suggestDefinition").value.trim();
+  if (acronym && definition) {
+    const url = `https://docs.google.com/forms/d/e/1FAIpQLSf8jGffpPkkf00uNTu_YVeEw1w7OrZwPb9Jpy22tfEwElHFmw/viewform?usp=pp_url&entry.961763670=${encodeURIComponent(acronym)}&entry.750852977=${encodeURIComponent(definition)}`;
+    window.open(url, "_blank");
+    closePopup();
+  } else {
+    alert("Please fill out both fields.");
+  }
+}
+</script>
+<div id="suggestionPopup" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+ background-color:#ffffff; border:1px solid #ccc; padding:24px; z-index:1000; box-shadow:0 4px 20px rgba(0,0,0,0.2); 
+ border-radius:12px; width:300px; font-family:Arial, sans-serif;">
+<h3 style="margin-top:0; color:#0d6937; font-size:1.25rem; text-align:center;">Suggest an Acronym</h3>
+<label style="font-size:0.9rem;">Acronym:</label>
+<input id="suggestAcronym" style="width:100%; padding:8px; margin-bottom:12px; border:1px solid #ccc; border-radius:4px;" type="text"/>
+<label style="font-size:0.9rem;">Definition:</label>
+<input id="suggestDefinition" style="width:100%; padding:8px; margin-bottom:16px; border:1px solid #ccc; border-radius:4px;" type="text"/>
+<div style="text-align:center;">
+<button onclick="submitSuggestion()" style="background-color:#0d6937; color:white; padding:8px 14px; border:none; border-radius:6px; cursor:pointer; font-size:0.9rem;">Submit</button>
+<button onclick="closePopup()" style="margin-left:10px; background-color:#ccc; color:#333; padding:8px 14px; border:none; border-radius:6px; cursor:pointer; font-size:0.9rem;">Cancel</button>
+</div>
+</div>
+<div id="overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+ background-color:rgba(0,0,0,0.4); z-index:999;"></div>
+</body>
+</html>
